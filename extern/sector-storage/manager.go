@@ -598,8 +598,12 @@ func (m *Manager) FinalizeSector(ctx context.Context, sector storage.SectorRef, 
 	if err != nil {
 		return err
 	}
+	// patched by maven on 2021-08-21 15:27 Saturday
+// 	-       fetchSel := newAllocSelector(m.index, storiface.FTCache|storiface.FTSealed, storiface.PathStorage)
+// +       fetchSel := newExistingSelector(m.index, sector.ID, storiface.FTCache|storiface.FTSealed, false)
 
-	fetchSel := newAllocSelector(m.index, storiface.FTCache|storiface.FTSealed, storiface.PathStorage)
+	// fetchSel := newAllocSelector(m.index, storiface.FTCache|storiface.FTSealed, storiface.PathStorage)
+	fetchSel := newExistingSelector(m.index, sector.ID, storiface.FTCache|storiface.FTSealed, false)
 	moveUnsealed := unsealed
 	{
 		if len(keepUnsealed) == 0 {

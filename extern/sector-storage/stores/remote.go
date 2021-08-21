@@ -1,6 +1,8 @@
 package stores
 
 import (
+	// patched by maven on 2021-08-21 15:27 Saturday
+	"bufio"
 	"context"
 	"encoding/json"
 	"io"
@@ -282,7 +284,18 @@ func (r *Remote) fetch(ctx context.Context, url, outname string) error {
 		if err != nil {
 			return err
 		}
-		_, err = io.CopyBuffer(f, resp.Body, make([]byte, CopyBuf))
+		// patched by maven on 2021-08-21 15:27 Saturday
+		// _, err = io.CopyBuffer(f, resp.Body, make([]byte, CopyBuf))
+		type onlyWriter struct {
+			io.Writer
+		}
+		bf := bufio.NewWriterSize(onlyWriter{f}, CopyBuf)
+		_, err = bf.ReadFrom(resp.Body)
+		if err != nil {
+			f.Close() // nolint
+			return err
+		}
+		err = bf.Flush()
 		if err != nil {
 			f.Close() // nolint
 			return err
